@@ -146,37 +146,37 @@ const MentorTeamDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-dark-900 transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-8 animate-slide-in-down">
           <button
             onClick={() => navigate('/mentor/dashboard')}
-            className="flex items-center text-gray-600 hover:text-gray-900 mb-4"
+            className="flex items-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 mb-4 transition-colors duration-300"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Mentor Dashboard
           </button>
-          
+
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">{team.name}</h1>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 transition-colors duration-300">{team.name} 🎯</h1>
               <div className="flex items-center gap-4 mt-2">
-                <span className="text-sm bg-green-100 text-green-800 px-3 py-1 rounded-full">
+                <span className="text-sm bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 px-3 py-1 rounded-full font-medium">
                   {team.group}
                 </span>
-                <span className="text-sm bg-blue-100 text-blue-800 px-3 py-1 rounded-full">
+                <span className="text-sm bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 px-3 py-1 rounded-full font-medium">
                   📚 {team.subject}
                 </span>
-                <span className="text-sm bg-gray-100 text-gray-800 px-3 py-1 rounded-full">
+                <span className="text-sm bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-300 px-3 py-1 rounded-full font-medium">
                   ID: {team.teamId}
                 </span>
-                <span className="text-sm bg-purple-100 text-purple-800 px-3 py-1 rounded-full">
+                <span className="text-sm bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300 px-3 py-1 rounded-full font-medium">
                   👁️ Monitoring
                 </span>
               </div>
               {team.description && (
-                <p className="text-gray-600 mt-2">{team.description}</p>
+                <p className="text-gray-600 dark:text-gray-400 mt-2 transition-colors duration-300">{team.description}</p>
               )}
             </div>
 

@@ -11,19 +11,25 @@ const NotificationSystem = () => {
   const [selectedNotification, setSelectedNotification] = useState(null);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const { user } = useAuth();
-  const { socket } = useSocket();
+  const { socket, onNewSuggestion, onMentorMonitoringStarted } = useSocket();
 
   useEffect(() => {
     if (user?.role === 'student') {
       fetchUnreadCount();
+      fetchNotifications();
 
-      // Listen for new suggestions
+      // Listen for new suggestions and mentor monitoring notifications
       if (socket) {
-        socket.on('new-suggestion', handleNewSuggestion);
-        return () => socket.off('new-suggestion', handleNewSuggestion);
+        const unsubscribeSuggestion = onNewSuggestion(handleNewSuggestion);
+        const unsubscribeMonitoring = onMentorMonitoringStarted(handleMentorMonitoringStarted);
+
+        return () => {
+          unsubscribeSuggestion();
+          unsubscribeMonitoring();
+        };
       }
     }
-  }, [user]);
+  }, [user, socket]);
 
   const fetchUnreadCount = async () => {
     try {
@@ -34,18 +40,69 @@ const NotificationSystem = () => {
     }
   };
 
+  const fetchNotifications = async () => {
+    try {
+      // Get user's teams first
+      const userResponse = await api.get('/auth/me');
+      const userTeams = userResponse.data.user.teams;
+
+      // Fetch suggestions from all user's teams
+      const allNotifications = [];
+      for (const teamId of userTeams) {
+        try {
+          const response = await api.get(`/suggestions/team/${teamId}`);
+          const teamSuggestions = response.data.suggestions.map(suggestion => ({
+            id: suggestion._id,
+            title: `${suggestion.type} from ${suggestion.mentor.name}`,
+            message: suggestion.title,
+            type: suggestion.type,
+            priority: suggestion.priority,
+            isUrgent: suggestion.isUrgent,
+            teamName: suggestion.team?.name || 'Unknown Team',
+            createdAt: suggestion.createdAt,
+            suggestion: suggestion,
+            isRead: suggestion.readBy.some(read => read.user === user._id)
+          }));
+          allNotifications.push(...teamSuggestions);
+        } catch (teamError) {
+          console.error(`Failed to fetch suggestions for team ${teamId}:`, teamError);
+        }
+      }
+
+      // Sort by creation date (newest first) and take latest 10
+      const sortedNotifications = allNotifications
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+        .slice(0, 10);
+
+      setNotifications(sortedNotifications);
+    } catch (error) {
+      console.error('Failed to fetch notifications:', error);
+    }
+  };
+
   const handleNewSuggestion = (data) => {
+    console.log('🔔 NotificationSystem: Handling new suggestion:', data);
     const { suggestion, notification } = data;
 
     // Create enhanced notification with full suggestion data
     const enhancedNotification = {
       ...notification,
       suggestion: suggestion, // Store full suggestion data
-      isRead: false
+      isRead: false,
+      showFloating: true // Show floating notification initially
     };
 
-    // Add to notifications list
-    setNotifications(prev => [enhancedNotification, ...prev.slice(0, 9)]); // Keep only 10 notifications
+    // Add to notifications list (avoid duplicates)
+    setNotifications(prev => {
+      const exists = prev.some(n => n.id === notification.id);
+      if (exists) {
+        console.log('⚠️ Notification already exists, skipping');
+        return prev;
+      }
+      return [enhancedNotification, ...prev.slice(0, 9)]; // Keep only 10 notifications
+    });
+
+    // Increment unread count
     setUnreadCount(prev => prev + 1);
 
     // Show browser notification if permission granted
@@ -67,6 +124,47 @@ const NotificationSystem = () => {
     }
   };
 
+  const handleMentorMonitoringStarted = (data) => {
+    console.log('👁️ NotificationSystem: Handling mentor monitoring started:', data);
+    const { notification } = data;
+
+    // Create enhanced notification for mentor monitoring
+    const enhancedNotification = {
+      ...notification,
+      isRead: false,
+      showFloating: true // Show floating notification initially
+    };
+
+    // Add to notifications list (avoid duplicates)
+    setNotifications(prev => {
+      const exists = prev.some(n => n.id === notification.id);
+      if (exists) {
+        console.log('⚠️ Mentor monitoring notification already exists, skipping');
+        return prev;
+      }
+      return [enhancedNotification, ...prev.slice(0, 9)]; // Keep only 10 notifications
+    });
+
+    // Increment unread count
+    setUnreadCount(prev => prev + 1);
+
+    // Show browser notification if permission granted
+    if (Notification.permission === 'granted') {
+      new Notification(notification.title, {
+        body: notification.message,
+        icon: '/favicon.ico',
+        tag: notification.id
+      });
+    }
+
+    // Auto-hide floating notification after 8 seconds (longer for mentor notifications)
+    setTimeout(() => {
+      setNotifications(prev => prev.map(n =>
+        n.id === notification.id ? { ...n, showFloating: false } : n
+      ));
+    }, 8000);
+  };
+
   const getNotificationIcon = (type) => {
     switch (type) {
       case 'suggestion':
@@ -79,6 +177,8 @@ const NotificationSystem = () => {
         return <AlertTriangle className="h-5 w-5 text-orange-500" />;
       case 'praise':
         return <Star className="h-5 w-5 text-yellow-500" />;
+      case 'mentor-monitoring':
+        return <Eye className="h-5 w-5 text-indigo-500" />;
       default:
         return <Bell className="h-5 w-5 text-gray-500" />;
     }
@@ -98,9 +198,14 @@ const NotificationSystem = () => {
     }
   };
 
-  const markAsRead = async (notificationId) => {
+  const markAsRead = async (notificationId, notificationType) => {
     try {
-      await api.put(`/suggestions/${notificationId}/read`);
+      console.log('📖 Marking notification as read:', notificationId, 'Type:', notificationType);
+
+      // Only call API for suggestion notifications, mentor monitoring notifications are client-side only
+      if (notificationType !== 'mentor-monitoring') {
+        await api.put(`/suggestions/${notificationId}/read`);
+      }
 
       // Update notification as read
       setNotifications(prev => prev.map(n =>
@@ -109,19 +214,31 @@ const NotificationSystem = () => {
 
       // Decrease unread count
       setUnreadCount(prev => Math.max(0, prev - 1));
+      console.log('✅ Notification marked as read successfully');
     } catch (error) {
-      console.error('Failed to mark as read:', error);
+      console.error('❌ Failed to mark notification as read:', error);
+      // Still mark as read locally even if API call fails
+      setNotifications(prev => prev.map(n =>
+        n.id === notificationId ? { ...n, isRead: true } : n
+      ));
+      setUnreadCount(prev => Math.max(0, prev - 1));
     }
   };
 
   const viewNotification = async (notification) => {
+    console.log('👁️ Viewing notification:', notification);
     setSelectedNotification(notification);
     setShowNotificationModal(true);
 
     // Mark as read when viewed
     if (!notification.isRead) {
-      await markAsRead(notification.id);
+      await markAsRead(notification.id, notification.type);
     }
+
+    // Hide floating notification when clicked
+    setNotifications(prev => prev.map(n =>
+      n.id === notification.id ? { ...n, showFloating: false } : n
+    ));
   };
 
   const dismissNotification = (notificationId) => {
@@ -335,7 +452,10 @@ const NotificationSystem = () => {
                     {selectedNotification.title}
                   </h3>
                   <p className="text-sm text-gray-500">
-                    From: {selectedNotification.suggestion?.mentor?.name} • {selectedNotification.teamName}
+                    {selectedNotification.type === 'mentor-monitoring'
+                      ? `Mentor: ${selectedNotification.mentorName} • ${selectedNotification.teamName}`
+                      : `From: ${selectedNotification.suggestion?.mentor?.name} • ${selectedNotification.teamName}`
+                    }
                   </p>
                 </div>
               </div>
@@ -375,11 +495,28 @@ const NotificationSystem = () => {
 
                 {/* Message Content */}
                 <div className="bg-gray-50 rounded-lg p-4">
-                  <h4 className="text-sm font-medium text-gray-900 mb-2">Message:</h4>
+                  <h4 className="text-sm font-medium text-gray-900 mb-2">
+                    {selectedNotification.type === 'mentor-monitoring' ? 'Notification:' : 'Message:'}
+                  </h4>
                   <p className="text-sm text-gray-700 whitespace-pre-wrap">
-                    {selectedNotification.suggestion?.content || selectedNotification.message}
+                    {selectedNotification.type === 'mentor-monitoring'
+                      ? selectedNotification.message
+                      : (selectedNotification.suggestion?.content || selectedNotification.message)
+                    }
                   </p>
                 </div>
+
+                {/* Additional info for mentor monitoring */}
+                {selectedNotification.type === 'mentor-monitoring' && (
+                  <div className="bg-indigo-50 rounded-lg p-4">
+                    <h4 className="text-sm font-medium text-indigo-900 mb-2">What this means:</h4>
+                    <ul className="text-sm text-indigo-700 space-y-1">
+                      <li>• Your mentor can now view your team's progress and tasks</li>
+                      <li>• You may receive suggestions and feedback to help improve your work</li>
+                      <li>• This is a positive step towards better collaboration and guidance</li>
+                    </ul>
+                  </div>
+                )}
 
                 {/* Timestamp */}
                 <div className="text-xs text-gray-500">

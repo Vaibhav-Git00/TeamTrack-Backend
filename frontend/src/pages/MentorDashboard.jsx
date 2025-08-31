@@ -80,30 +80,30 @@ const MentorDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-dark-900 transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">
-            Mentor Dashboard
+        <div className="mb-8 animate-slide-in-down">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 transition-colors duration-300">
+            Mentor Dashboard 🎓
           </h1>
-          <p className="mt-2 text-gray-600">
+          <p className="mt-2 text-gray-600 dark:text-gray-400 transition-colors duration-300">
             Monitor teams and provide guidance to students.
           </p>
         </div>
 
         {/* Success/Error Messages */}
         {success && (
-          <div className="mb-6 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded">
+          <div className="mb-6 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-300 px-4 py-3 rounded-xl animate-slide-in-down transition-colors duration-300">
             {success}
           </div>
         )}
         {error && (
-          <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+          <div className="mb-6 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded-xl animate-slide-in-down transition-colors duration-300">
             {error}
-            <button 
+            <button
               onClick={() => setError('')}
-              className="ml-2 text-red-500 hover:text-red-700"
+              className="ml-2 text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 transition-colors duration-300"
             >
               ×
             </button>
@@ -111,30 +111,30 @@ const MentorDashboard = () => {
         )}
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="card">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 animate-slide-in-up">
+          <div className="card bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 hover:shadow-lg transition-all duration-300">
             <div className="card-content">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
-                  <Users className="h-8 w-8 text-primary-600" />
+                  <Users className="h-8 w-8 text-primary-600 dark:text-primary-400" />
                 </div>
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-500">Monitoring Teams</p>
-                  <p className="text-2xl font-semibold text-gray-900">{monitoringTeams.length}</p>
+                  <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Monitoring Teams</p>
+                  <p className="text-2xl font-semibold text-gray-900 dark:text-gray-100">{monitoringTeams.length}</p>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="card">
+          <div className="card bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 hover:shadow-lg transition-all duration-300">
             <div className="card-content">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
-                  <BookOpen className="h-8 w-8 text-green-600" />
+                  <BookOpen className="h-8 w-8 text-green-600 dark:text-green-400" />
                 </div>
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-500">Total Students</p>
-                  <p className="text-2xl font-semibold text-gray-900">
+                  <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Students</p>
+                  <p className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
                     {monitoringTeams.reduce((acc, team) => acc + (team.members?.length || 0), 0)}
                   </p>
                 </div>
@@ -142,15 +142,15 @@ const MentorDashboard = () => {
             </div>
           </div>
 
-          <div className="card">
+          <div className="card bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 hover:shadow-lg transition-all duration-300">
             <div className="card-content">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
-                  <TrendingUp className="h-8 w-8 text-blue-600" />
+                  <TrendingUp className="h-8 w-8 text-blue-600 dark:text-blue-400" />
                 </div>
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-500">Available Teams</p>
-                  <p className="text-2xl font-semibold text-gray-900">{allTeams.length}</p>
+                  <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Available Teams</p>
+                  <p className="text-2xl font-semibold text-gray-900 dark:text-gray-100">{allTeams.length}</p>
                 </div>
               </div>
             </div>
@@ -158,34 +158,36 @@ const MentorDashboard = () => {
         </div>
 
         {/* Tabs */}
-        <div className="mb-6">
-          <nav className="flex space-x-8">
+        <div className="mb-6 animate-slide-in-up">
+          <nav className="flex space-x-8 border-b border-gray-200 dark:border-dark-700">
             <button
               onClick={() => setActiveTab('monitoring')}
-              className={`py-2 px-1 border-b-2 font-medium text-sm ${
+              className={`py-3 px-1 border-b-2 font-semibold text-sm transition-all duration-300 ${
                 activeTab === 'monitoring'
-                  ? 'border-primary-500 text-primary-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  ? 'border-primary-500 text-primary-600 dark:text-primary-400'
+                  : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-dark-600'
               }`}
             >
+              <Eye className="inline-block w-4 h-4 mr-2" />
               Monitoring Teams ({monitoringTeams.length})
             </button>
             <button
               onClick={() => setActiveTab('groups')}
-              className={`py-2 px-1 border-b-2 font-medium text-sm ${
+              className={`py-3 px-1 border-b-2 font-semibold text-sm transition-all duration-300 ${
                 activeTab === 'groups'
-                  ? 'border-primary-500 text-primary-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  ? 'border-primary-500 text-primary-600 dark:text-primary-400'
+                  : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-dark-600'
               }`}
             >
+              <Users className="inline-block w-4 h-4 mr-2" />
               Teams by Group
             </button>
             <button
               onClick={() => setActiveTab('available')}
-              className={`py-2 px-1 border-b-2 font-medium text-sm ${
+              className={`py-3 px-1 border-b-2 font-semibold text-sm transition-all duration-300 ${
                 activeTab === 'available'
-                  ? 'border-primary-500 text-primary-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  ? 'border-primary-500 text-primary-600 dark:text-primary-400'
+                  : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-dark-600'
               }`}
             >
               All Teams ({allTeams.length})
@@ -291,48 +293,55 @@ const MentorDashboard = () => {
 
 // Monitoring Team Card Component
 const MonitoringTeamCard = ({ team }) => {
+  const navigate = useNavigate();
+
+  const handleViewDetails = () => {
+    console.log('Navigating to mentor team dashboard:', `/mentor/team/${team._id}`);
+    navigate(`/mentor/team/${team._id}`);
+  };
+
   return (
-    <div className="card">
-      <div className="card-header">
+    <div className="card bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 hover:shadow-xl dark:hover:shadow-dark-900/30 transition-all duration-300 animate-slide-in-up">
+      <div className="card-header bg-gray-50 dark:bg-dark-700/50 border-b border-gray-200 dark:border-dark-700">
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-medium text-gray-900">{team.name}</h3>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{team.name}</h3>
           <div className="flex gap-2">
-            <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+            <span className="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 px-2 py-1 rounded-full font-medium">
               {team.group}
             </span>
-            <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
+            <span className="text-xs bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 px-2 py-1 rounded-full font-medium">
               Monitoring
             </span>
           </div>
         </div>
         {team.description && (
-          <p className="text-sm text-gray-600 mt-1">{team.description}</p>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{team.description}</p>
         )}
       </div>
       <div className="card-content">
-        <div className="space-y-2">
+        <div className="space-y-3">
           <div className="flex items-center justify-between text-sm">
-            <span className="text-gray-500">Team ID:</span>
-            <span className="font-medium">{team.teamId}</span>
+            <span className="text-gray-500 dark:text-gray-400">Team ID:</span>
+            <span className="font-medium text-gray-900 dark:text-gray-100">{team.teamId}</span>
           </div>
           <div className="flex items-center justify-between text-sm">
-            <span className="text-gray-500">Subject:</span>
-            <span className="font-medium text-blue-600">📚 {team.subject}</span>
+            <span className="text-gray-500 dark:text-gray-400">Subject:</span>
+            <span className="font-medium text-blue-600 dark:text-blue-400">📚 {team.subject}</span>
           </div>
           <div className="flex items-center justify-between text-sm">
-            <span className="text-gray-500">Members:</span>
-            <span className="font-medium">{team.members?.length || 0}/{team.size}</span>
+            <span className="text-gray-500 dark:text-gray-400">Members:</span>
+            <span className="font-medium text-gray-900 dark:text-gray-100">{team.members?.length || 0}/{team.size}</span>
           </div>
           <div className="flex items-center justify-between text-sm">
-            <span className="text-gray-500">Leader:</span>
-            <span className="font-medium">{team.leader?.name}</span>
+            <span className="text-gray-500 dark:text-gray-400">Leader:</span>
+            <span className="font-medium text-gray-900 dark:text-gray-100">{team.leader?.name}</span>
           </div>
         </div>
       </div>
       <div className="card-footer">
         <button
-          onClick={() => navigate(`/mentor/team/${team._id}`)}
-          className="btn btn-primary text-sm w-full flex items-center justify-center gap-2"
+          onClick={handleViewDetails}
+          className="btn btn-primary text-sm w-full flex items-center justify-center gap-2 hover:scale-[1.02] transition-transform duration-300"
         >
           <ExternalLink className="h-4 w-4" />
           View Details
@@ -351,39 +360,39 @@ const GroupTeamCard = ({ team, onStartMonitoring, isMonitoring }) => {
   };
 
   return (
-    <div className="card">
-      <div className="card-header">
+    <div className="card bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 hover:shadow-xl dark:hover:shadow-dark-900/30 transition-all duration-300 animate-slide-in-up">
+      <div className="card-header bg-gray-50 dark:bg-dark-700/50 border-b border-gray-200 dark:border-dark-700">
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-medium text-gray-900">{team.name}</h3>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{team.name}</h3>
           <div className="flex gap-2">
-            <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+            <span className="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 px-2 py-1 rounded-full font-medium">
               {team.group}
             </span>
-            <span className="text-xs bg-primary-100 text-primary-800 px-2 py-1 rounded-full">
+            <span className="text-xs bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-300 px-2 py-1 rounded-full font-medium">
               {team.teamId}
             </span>
           </div>
         </div>
         {team.subject && (
-          <p className="text-sm font-medium text-blue-600 mt-1">📚 {team.subject}</p>
+          <p className="text-sm font-medium text-blue-600 dark:text-blue-400 mt-1">📚 {team.subject}</p>
         )}
         {team.description && (
-          <p className="text-sm text-gray-600 mt-1">{team.description}</p>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{team.description}</p>
         )}
       </div>
       <div className="card-content">
-        <div className="space-y-2">
+        <div className="space-y-3">
           <div className="flex items-center justify-between text-sm">
-            <span className="text-gray-500">Members:</span>
-            <span className="font-medium">{team.members?.length || 0}/{team.size}</span>
+            <span className="text-gray-500 dark:text-gray-400">Members:</span>
+            <span className="font-medium text-gray-900 dark:text-gray-100">{team.members?.length || 0}/{team.size}</span>
           </div>
           <div className="flex items-center justify-between text-sm">
-            <span className="text-gray-500">Leader:</span>
-            <span className="font-medium">{team.leader?.name}</span>
+            <span className="text-gray-500 dark:text-gray-400">Leader:</span>
+            <span className="font-medium text-gray-900 dark:text-gray-100">{team.leader?.name}</span>
           </div>
           <div className="flex items-center justify-between text-sm">
-            <span className="text-gray-500">Created:</span>
-            <span className="font-medium">
+            <span className="text-gray-500 dark:text-gray-400">Created:</span>
+            <span className="font-medium text-gray-900 dark:text-gray-100">
               {new Date(team.createdAt).toLocaleDateString()}
             </span>
           </div>
@@ -393,20 +402,22 @@ const GroupTeamCard = ({ team, onStartMonitoring, isMonitoring }) => {
         <div className="flex gap-2">
           <button
             onClick={handleViewDetails}
-            className="btn btn-outline text-sm flex-1 flex items-center justify-center gap-2"
+            className="btn btn-outline text-sm flex-1 flex items-center justify-center gap-2 hover:scale-[1.02] transition-transform duration-300"
           >
             <ExternalLink className="h-4 w-4" />
             View Details
           </button>
           {isMonitoring ? (
             <button className="btn btn-secondary text-sm flex-1" disabled>
+              <Eye className="h-4 w-4 mr-1" />
               Monitoring
             </button>
           ) : (
             <button
               onClick={() => onStartMonitoring(team._id)}
-              className="btn btn-primary text-sm flex-1"
+              className="btn btn-primary text-sm flex-1 hover:scale-[1.02] transition-transform duration-300"
             >
+              <Plus className="h-4 w-4 mr-1" />
               Start Monitoring
             </button>
           )}

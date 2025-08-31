@@ -226,15 +226,22 @@ const addMentorToTeam = async (req, res) => {
     const { id } = req.params;
     const mentorId = req.user._id;
 
-    const team = await Team.findById(id);
+    const team = await Team.findById(id)
+      .populate('leader', 'name email')
+      .populate('members.user', 'name email')
+      .populate('mentors', 'name email');
+
     if (!team) {
       return res.status(404).json({ message: 'Team not found' });
     }
 
     // Check if mentor is already monitoring this team
-    if (team.mentors.includes(mentorId)) {
+    if (team.mentors.some(mentor => mentor._id.toString() === mentorId.toString())) {
       return res.status(400).json({ message: 'You are already monitoring this team' });
     }
+
+    // Get mentor details
+    const mentor = await User.findById(mentorId).select('name email');
 
     // Add mentor to team
     team.mentors.push(mentorId);
@@ -245,10 +252,38 @@ const addMentorToTeam = async (req, res) => {
       $push: { monitoringTeams: team._id }
     });
 
+    // Get updated team with populated mentor
     const updatedTeam = await Team.findById(id)
       .populate('leader', 'name email')
       .populate('members.user', 'name email')
       .populate('mentors', 'name email');
+
+    // Send real-time notification to all team members
+    if (global.io) {
+      const notificationData = {
+        type: 'mentor-monitoring',
+        notification: {
+          id: `mentor-${mentorId}-${id}-${Date.now()}`,
+          title: `${mentor.name} started monitoring your team`,
+          message: `Mentor ${mentor.name} is now monitoring "${team.name}" and will provide guidance and support.`,
+          type: 'mentor-monitoring',
+          priority: 'medium',
+          isUrgent: false,
+          teamName: team.name,
+          teamId: team.teamId,
+          mentorName: mentor.name,
+          mentorEmail: mentor.email,
+          createdAt: new Date(),
+          showFloating: true
+        }
+      };
+
+      console.log(`🔔 Sending mentor monitoring notification to team-${id}:`, notificationData.notification.title);
+      global.io.to(`team-${id}`).emit('mentor-monitoring-started', notificationData);
+      console.log(`✅ Mentor monitoring notification sent to team-${id}`);
+    } else {
+      console.warn('⚠️ Socket.io not available for mentor monitoring notifications');
+    }
 
     res.json({
       success: true,

@@ -53,7 +53,7 @@ const createSuggestion = async (req, res) => {
 
     // Send real-time notification to team members
     if (global.io) {
-      global.io.to(`team-${teamId}`).emit('new-suggestion', {
+      const notificationData = {
         suggestion: populatedSuggestion,
         notification: {
           id: suggestion._id,
@@ -66,7 +66,13 @@ const createSuggestion = async (req, res) => {
           createdAt: suggestion.createdAt,
           suggestion: populatedSuggestion // Include full suggestion data
         }
-      });
+      };
+
+      console.log(`🔔 Sending notification to team-${teamId}:`, notificationData.notification.title);
+      global.io.to(`team-${teamId}`).emit('new-suggestion', notificationData);
+      console.log(`✅ Notification sent to team-${teamId}`);
+    } else {
+      console.warn('⚠️ Socket.io not available for notifications');
     }
 
     res.status(201).json({

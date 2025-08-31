@@ -1,33 +1,48 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Send, Smile, Paperclip, MoreVertical, Trash2 } from 'lucide-react';
+import { Send, Smile, Paperclip, MoreVertical, Trash2, Edit3, Check, X, Eye } from 'lucide-react';
 import { useSocket } from '../context/SocketContext';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/axios';
 
-const TeamChat = ({ teamId, teamName }) => {
+const TeamChat = ({ teamId, teamName, teamMembers = [], mentors = [] }) => {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(true);
   const [typingUsers, setTypingUsers] = useState(new Set());
   const [isTyping, setIsTyping] = useState(false);
+  const [onlineMembers, setOnlineMembers] = useState(new Map());
+  const [onlineMentors, setOnlineMentors] = useState(new Map());
+  const [editingMessage, setEditingMessage] = useState(null);
+  const [editText, setEditText] = useState('');
   const messagesEndRef = useRef(null);
   const typingTimeoutRef = useRef(null);
   const { user } = useAuth();
-  const { 
-    isConnected, 
-    joinTeam, 
-    leaveTeam, 
-    sendMessage, 
-    sendTyping, 
-    onNewMessage, 
-    onUserTyping, 
-    onMessageError 
+  const {
+    isConnected,
+    joinedTeams,
+    joinTeam,
+    leaveTeam,
+    sendMessage,
+    sendTyping,
+    markMessageAsRead,
+    editMessage,
+    deleteMessage,
+    onNewMessage,
+    onUserTyping,
+    onMessageError,
+    onOnlineStatusUpdate,
+    onMessageRead,
+    onMessageEdited,
+    onMessageDeleted
   } = useSocket();
 
   useEffect(() => {
-    if (teamId) {
+    if (teamId && isConnected) {
       fetchMessages();
-      joinTeam(teamId);
+      // Small delay to ensure socket is ready
+      setTimeout(() => {
+        joinTeam(teamId);
+      }, 100);
     }
 
     return () => {
@@ -35,12 +50,31 @@ const TeamChat = ({ teamId, teamName }) => {
         leaveTeam(teamId);
       }
     };
-  }, [teamId]);
+  }, [teamId, isConnected]);
 
   useEffect(() => {
+    if (!isConnected) return;
+
     // Listen for new messages
     const unsubscribeNewMessage = onNewMessage((message) => {
-      setMessages(prev => [...prev, message]);
+      console.log('📨 TeamChat: Received new message', message);
+      setMessages(prev => {
+        // Check if message already exists to prevent duplicates
+        const exists = prev.some(m => m._id === message._id);
+        if (exists) {
+          console.log('⚠️ Message already exists, skipping');
+          return prev;
+        }
+        return [...prev, message];
+      });
+
+      // Auto-mark message as read if user is viewing the chat
+      if (message.sender._id !== user?.id) {
+        setTimeout(() => {
+          markMessageAsRead(message._id, teamId);
+        }, 1000);
+      }
+
       scrollToBottom();
     });
 
@@ -59,17 +93,69 @@ const TeamChat = ({ teamId, teamName }) => {
       }
     });
 
+    // Listen for online status updates
+    const unsubscribeOnlineStatus = onOnlineStatusUpdate((data) => {
+      const { onlineMembers = [], onlineMentors = [] } = data;
+
+      // Update online members
+      const membersMap = new Map();
+      onlineMembers.forEach(member => {
+        membersMap.set(member._id, member);
+      });
+      setOnlineMembers(membersMap);
+
+      // Update online mentors
+      const mentorsMap = new Map();
+      onlineMentors.forEach(mentor => {
+        mentorsMap.set(mentor._id, mentor);
+      });
+      setOnlineMentors(mentorsMap);
+    });
+
+    // Listen for message read receipts
+    const unsubscribeMessageRead = onMessageRead((data) => {
+      const { messageId, readBy } = data;
+      setMessages(prev => prev.map(msg => {
+        if (msg._id === messageId) {
+          const updatedReadBy = [...(msg.readBy || [])];
+          if (!updatedReadBy.some(r => r.user === readBy.user)) {
+            updatedReadBy.push(readBy);
+          }
+          return { ...msg, readBy: updatedReadBy };
+        }
+        return msg;
+      }));
+    });
+
+    // Listen for message edits
+    const unsubscribeMessageEdited = onMessageEdited((editedMessage) => {
+      setMessages(prev => prev.map(msg =>
+        msg._id === editedMessage._id ? editedMessage : msg
+      ));
+    });
+
+    // Listen for message deletions
+    const unsubscribeMessageDeleted = onMessageDeleted((data) => {
+      const { messageId } = data;
+      setMessages(prev => prev.filter(msg => msg._id !== messageId));
+    });
+
     // Listen for message errors
     const unsubscribeError = onMessageError((error) => {
-      console.error('Message error:', error);
+      console.error('💥 TeamChat: Message error:', error);
+      // You could show a toast notification here
     });
 
     return () => {
-      if (unsubscribeNewMessage) unsubscribeNewMessage();
-      if (unsubscribeTyping) unsubscribeTyping();
-      if (unsubscribeError) unsubscribeError();
+      unsubscribeNewMessage();
+      unsubscribeTyping();
+      unsubscribeOnlineStatus();
+      unsubscribeMessageRead();
+      unsubscribeMessageEdited();
+      unsubscribeMessageDeleted();
+      unsubscribeError();
     };
-  }, [user?.id]);
+  }, [user?.id, isConnected, teamId]);
 
   useEffect(() => {
     scrollToBottom();
@@ -93,9 +179,41 @@ const TeamChat = ({ teamId, teamName }) => {
   const handleSendMessage = (e) => {
     e.preventDefault();
     if (newMessage.trim() && isConnected) {
-      sendMessage(teamId, newMessage.trim());
-      setNewMessage('');
-      handleStopTyping();
+      const success = sendMessage(teamId, newMessage.trim());
+      if (success) {
+        setNewMessage('');
+        handleStopTyping();
+      } else {
+        console.error('❌ Failed to send message - socket not connected');
+        // You could show an error toast here
+      }
+    } else if (!isConnected) {
+      console.warn('⚠️ Cannot send message: Not connected to server');
+      // You could show a warning toast here
+    }
+  };
+
+  const handleEditMessage = (message) => {
+    setEditingMessage(message._id);
+    setEditText(message.message);
+  };
+
+  const handleSaveEdit = () => {
+    if (editText.trim() && editingMessage) {
+      editMessage(editingMessage, editText.trim(), teamId);
+      setEditingMessage(null);
+      setEditText('');
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingMessage(null);
+    setEditText('');
+  };
+
+  const handleDeleteMessage = (messageId) => {
+    if (window.confirm('Are you sure you want to delete this message?')) {
+      deleteMessage(messageId, teamId);
     }
   };
 
@@ -176,9 +294,45 @@ const TeamChat = ({ teamId, teamName }) => {
       <div className="flex items-center justify-between p-4 border-b border-gray-200">
         <div>
           <h3 className="text-lg font-medium text-gray-900">{teamName} Chat</h3>
-          <p className="text-sm text-gray-500">
-            {isConnected ? 'Connected' : 'Connecting...'}
-          </p>
+          <div className="flex items-center space-x-4 text-sm text-gray-500">
+            <span>{isConnected ? 'Connected' : 'Connecting...'}</span>
+
+            {/* Online Mentors Status */}
+            {onlineMentors.size > 0 && (
+              <div className="flex items-center space-x-1">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                <span className="text-green-600 font-medium">
+                  Mentor{onlineMentors.size > 1 ? 's' : ''} online
+                </span>
+              </div>
+            )}
+
+            {/* Online Members Count */}
+            {onlineMembers.size > 0 && (
+              <span className="text-gray-400">
+                {onlineMembers.size} member{onlineMembers.size > 1 ? 's' : ''} online
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Online Users List */}
+        <div className="flex items-center space-x-2">
+          {Array.from(onlineMentors.values()).map(mentor => (
+            <div key={mentor._id} className="flex items-center space-x-1">
+              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+              <span className="text-xs text-green-600 font-medium">{mentor.name}</span>
+            </div>
+          ))}
+          {Array.from(onlineMembers.values()).slice(0, 3).map(member => (
+            <div key={member._id} className="flex items-center space-x-1">
+              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+              <span className="text-xs text-gray-600">{member.name}</span>
+            </div>
+          ))}
+          {onlineMembers.size > 3 && (
+            <span className="text-xs text-gray-400">+{onlineMembers.size - 3} more</span>
+          )}
         </div>
       </div>
 
@@ -201,27 +355,94 @@ const TeamChat = ({ teamId, teamName }) => {
                   message.sender._id === user?.id ? 'justify-end' : 'justify-start'
                 }`}
               >
-                <div
-                  className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                    message.sender._id === user?.id
-                      ? 'bg-primary-600 text-white'
-                      : 'bg-gray-100 text-gray-900'
-                  }`}
-                >
-                  {message.sender._id !== user?.id && (
-                    <div className="text-xs font-medium mb-1 opacity-75">
-                      {message.sender.name}
-                    </div>
-                  )}
-                  <div className="text-sm">{message.message}</div>
+                <div className={`max-w-xs lg:max-w-md ${message.sender._id === user?.id ? 'ml-auto' : 'mr-auto'}`}>
                   <div
-                    className={`text-xs mt-1 ${
+                    className={`px-4 py-2 rounded-lg relative group ${
                       message.sender._id === user?.id
-                        ? 'text-primary-100'
-                        : 'text-gray-500'
+                        ? 'bg-primary-600 text-white'
+                        : 'bg-gray-100 text-gray-900'
                     }`}
                   >
-                    {formatTime(message.createdAt)}
+                    {/* Message Actions (Edit/Delete) */}
+                    {message.sender._id === user?.id && (
+                      <div className="absolute -top-2 -right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="flex space-x-1">
+                          <button
+                            onClick={() => handleEditMessage(message)}
+                            className="p-1 bg-white rounded-full shadow-md hover:bg-gray-50"
+                          >
+                            <Edit3 className="h-3 w-3 text-gray-600" />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteMessage(message._id)}
+                            className="p-1 bg-white rounded-full shadow-md hover:bg-gray-50"
+                          >
+                            <Trash2 className="h-3 w-3 text-red-600" />
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {message.sender._id !== user?.id && (
+                      <div className="text-xs font-medium mb-1 opacity-75">
+                        {message.sender.name}
+                      </div>
+                    )}
+
+                    {/* Message Content or Edit Input */}
+                    {editingMessage === message._id ? (
+                      <div className="space-y-2">
+                        <input
+                          type="text"
+                          value={editText}
+                          onChange={(e) => setEditText(e.target.value)}
+                          className="w-full px-2 py-1 text-sm border rounded text-gray-900"
+                          onKeyPress={(e) => {
+                            if (e.key === 'Enter') handleSaveEdit();
+                            if (e.key === 'Escape') handleCancelEdit();
+                          }}
+                          autoFocus
+                        />
+                        <div className="flex space-x-2">
+                          <button
+                            onClick={handleSaveEdit}
+                            className="p-1 bg-green-500 text-white rounded hover:bg-green-600"
+                          >
+                            <Check className="h-3 w-3" />
+                          </button>
+                          <button
+                            onClick={handleCancelEdit}
+                            className="p-1 bg-gray-500 text-white rounded hover:bg-gray-600"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="text-sm">
+                          {message.message}
+                          {message.isEdited && (
+                            <span className="text-xs opacity-60 ml-2">(edited)</span>
+                          )}
+                        </div>
+
+                        {/* Message Footer */}
+                        <div className={`flex items-center justify-between mt-1 text-xs ${
+                          message.sender._id === user?.id ? 'text-primary-100' : 'text-gray-500'
+                        }`}>
+                          <span>{formatTime(message.createdAt)}</span>
+
+                          {/* Read Receipts */}
+                          {message.sender._id === user?.id && message.readBy && message.readBy.length > 0 && (
+                            <div className="flex items-center space-x-1">
+                              <Check className="h-3 w-3" />
+                              <span>{message.readBy.length}</span>
+                            </div>
+                          )}
+                        </div>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>

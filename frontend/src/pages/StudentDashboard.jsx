@@ -197,30 +197,30 @@ const StudentDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-dark-900 transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">
-            Welcome back, {user?.name}!
+        <div className="mb-8 animate-slide-in-down">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 transition-colors duration-300">
+            Welcome back, {user?.name}! 👋
           </h1>
-          <p className="mt-2 text-gray-600">
+          <p className="mt-2 text-gray-600 dark:text-gray-400 transition-colors duration-300">
             Manage your teams and collaborate with your peers.
           </p>
         </div>
 
         {/* Success/Error Messages */}
         {success && (
-          <div className="mb-6 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded">
+          <div className="mb-6 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-300 px-4 py-3 rounded-xl animate-slide-in-down transition-colors duration-300">
             {success}
           </div>
         )}
         {error && (
-          <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+          <div className="mb-6 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded-xl animate-slide-in-down transition-colors duration-300">
             {error}
-            <button 
+            <button
               onClick={() => setError('')}
-              className="ml-2 text-red-500 hover:text-red-700"
+              className="ml-2 text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 transition-colors duration-300"
             >
               ×
             </button>
@@ -228,24 +228,25 @@ const StudentDashboard = () => {
         )}
 
         {/* Tab Navigation */}
-        <div className="mb-8">
-          <nav className="flex space-x-8">
+        <div className="mb-8 animate-slide-in-up">
+          <nav className="flex space-x-8 border-b border-gray-200 dark:border-dark-700">
             <button
               onClick={() => setActiveTab('teams')}
-              className={`py-2 px-1 border-b-2 font-medium text-sm ${
+              className={`py-3 px-1 border-b-2 font-semibold text-sm transition-all duration-300 ${
                 activeTab === 'teams'
-                  ? 'border-primary-500 text-primary-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  ? 'border-primary-500 text-primary-600 dark:text-primary-400'
+                  : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-dark-600'
               }`}
             >
+              <Users className="inline-block w-4 h-4 mr-2" />
               My Teams ({teams.length})
             </button>
             <button
               onClick={() => setActiveTab('resources')}
-              className={`py-2 px-1 border-b-2 font-medium text-sm ${
+              className={`py-3 px-1 border-b-2 font-semibold text-sm transition-all duration-300 ${
                 activeTab === 'resources'
-                  ? 'border-primary-500 text-primary-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  ? 'border-primary-500 text-primary-600 dark:text-primary-400'
+                  : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-dark-600'
               }`}
             >
               All Resources ({resources.length})
@@ -287,10 +288,10 @@ const StudentDashboard = () => {
             ))}
 
             {teams.length === 0 && (
-              <div className="col-span-full text-center py-12">
-                <Users className="mx-auto h-12 w-12 text-gray-400" />
-                <h3 className="mt-2 text-sm font-medium text-gray-900">No teams yet</h3>
-                <p className="mt-1 text-sm text-gray-500">
+              <div className="col-span-full text-center py-12 animate-fade-in">
+                <Users className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" />
+                <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">No teams yet</h3>
+                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                   Get started by creating a team or joining an existing one.
                 </p>
               </div>
@@ -309,17 +310,17 @@ const StudentDashboard = () => {
                   getResourceIcon={getResourceIcon}
                   formatFileSize={formatFileSize}
                 />
-                <div className="absolute top-2 right-2 bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+                <div className="absolute top-2 right-2 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 text-xs px-2 py-1 rounded-full transition-colors duration-300">
                   {resource.teamName}
                 </div>
               </div>
             ))}
 
             {resources.length === 0 && (
-              <div className="col-span-full text-center py-12">
-                <BookOpen className="mx-auto h-12 w-12 text-gray-400" />
-                <h3 className="mt-2 text-sm font-medium text-gray-900">No resources yet</h3>
-                <p className="mt-1 text-sm text-gray-500">
+              <div className="col-span-full text-center py-12 animate-fade-in">
+                <BookOpen className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" />
+                <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">No resources yet</h3>
+                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                   Resources from your teams will appear here once uploaded.
                 </p>
               </div>
@@ -329,26 +330,26 @@ const StudentDashboard = () => {
 
         {/* Create Team Modal */}
         {showCreateTeam && (
-          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-lg max-w-md w-full p-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Create New Team</h3>
+          <div className="fixed inset-0 bg-gray-600 dark:bg-dark-900 bg-opacity-50 dark:bg-opacity-75 flex items-center justify-center p-4 z-50 animate-fade-in">
+            <div className="bg-white dark:bg-dark-800 rounded-xl max-w-md w-full p-6 shadow-2xl border border-gray-200 dark:border-dark-700 animate-slide-in-up">
+              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Create New Team</h3>
               <form onSubmit={handleCreateTeam}>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Team Name</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Team Name</label>
                     <input
                       type="text"
-                      className="input mt-1"
+                      className="input mt-1 bg-white dark:bg-dark-700 border-gray-300 dark:border-dark-600 text-gray-900 dark:text-gray-100"
                       value={createTeamData.name}
                       onChange={(e) => setCreateTeamData({...createTeamData, name: e.target.value})}
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Subject</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Subject</label>
                     <input
                       type="text"
-                      className="input mt-1"
+                      className="input mt-1 bg-white dark:bg-dark-700 border-gray-300 dark:border-dark-600 text-gray-900 dark:text-gray-100"
                       placeholder="e.g., AI, Web Development, IoT"
                       value={createTeamData.subject}
                       onChange={(e) => setCreateTeamData({...createTeamData, subject: e.target.value})}
@@ -356,9 +357,9 @@ const StudentDashboard = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Group</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Group</label>
                     <select
-                      className="input mt-1"
+                      className="input mt-1 bg-white dark:bg-dark-700 border-gray-300 dark:border-dark-600 text-gray-900 dark:text-gray-100"
                       value={createTeamData.group}
                       onChange={(e) => setCreateTeamData({...createTeamData, group: e.target.value})}
                     >
@@ -495,16 +496,16 @@ const TeamCard = ({ team, currentUserId, onEdit, onDelete }) => {
   const isMember = team.members?.some(member => member.user._id === currentUserId);
 
   return (
-    <div className="card">
-      <div className="card-header">
+    <div className="card bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 hover:shadow-xl dark:hover:shadow-dark-900/30 transition-all duration-300 animate-slide-in-up">
+      <div className="card-header bg-gray-50 dark:bg-dark-700/50 border-b border-gray-200 dark:border-dark-700">
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-medium text-gray-900">{team.name}</h3>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{team.name}</h3>
           <div className="flex items-center gap-2">
             <div className="flex gap-2">
-              <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
+              <span className="text-xs bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 px-2 py-1 rounded-full font-medium">
                 {team.group}
               </span>
-              <span className="text-xs bg-primary-100 text-primary-800 px-2 py-1 rounded-full">
+              <span className="text-xs bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-300 px-2 py-1 rounded-full font-medium">
                 {team.teamId}
               </span>
             </div>
@@ -512,14 +513,14 @@ const TeamCard = ({ team, currentUserId, onEdit, onDelete }) => {
               <div className="flex items-center gap-1">
                 <button
                   onClick={() => onEdit(team)}
-                  className="p-1 text-gray-400 hover:text-blue-600 transition-colors"
+                  className="p-2 text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-all duration-300"
                   title="Edit team"
                 >
                   <Edit className="h-4 w-4" />
                 </button>
                 <button
                   onClick={() => onDelete(team)}
-                  className="p-1 text-gray-400 hover:text-red-600 transition-colors"
+                  className="p-2 text-gray-400 dark:text-gray-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all duration-300"
                   title={isLeader ? "Delete team" : "Leave team"}
                 >
                   <Trash2 className="h-4 w-4" />
@@ -529,34 +530,34 @@ const TeamCard = ({ team, currentUserId, onEdit, onDelete }) => {
           </div>
         </div>
         {team.subject && (
-          <p className="text-sm font-medium text-blue-600 mt-1">📚 {team.subject}</p>
+          <p className="text-sm font-medium text-blue-600 dark:text-blue-400 mt-1">📚 {team.subject}</p>
         )}
         {team.description && (
-          <p className="text-sm text-gray-600 mt-1">{team.description}</p>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{team.description}</p>
         )}
       </div>
       <div className="card-content">
-        <div className="flex items-center justify-between text-sm text-gray-500">
-          <span className="flex items-center gap-1">
-            <Users className="h-4 w-4" />
-            {team.members?.length || 0}/{team.size} members
+        <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
+          <span className="flex items-center gap-2">
+            <Users className="h-4 w-4 text-primary-500" />
+            <span className="font-medium">{team.members?.length || 0}/{team.size} members</span>
           </span>
-          <span className="flex items-center gap-1">
-            <BookOpen className="h-4 w-4" />
-            Resources
+          <span className="flex items-center gap-2">
+            <BookOpen className="h-4 w-4 text-green-500" />
+            <span className="font-medium">Resources</span>
           </span>
         </div>
-        <div className="mt-3">
-          <p className="text-sm text-gray-600">
-            Leader: {team.leader?.name}
-            {isLeader && <span className="text-primary-600 font-medium"> (You)</span>}
+        <div className="mt-4 p-3 bg-gray-50 dark:bg-dark-700/50 rounded-lg">
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            <span className="font-medium text-gray-900 dark:text-gray-100">Leader:</span> {team.leader?.name}
+            {isLeader && <span className="text-primary-600 dark:text-primary-400 font-semibold"> (You)</span>}
           </p>
         </div>
       </div>
       <div className="card-footer">
         <button
           onClick={handleViewTeam}
-          className="btn btn-primary text-sm w-full flex items-center justify-center gap-2"
+          className="btn btn-primary text-sm w-full flex items-center justify-center gap-2 hover:scale-[1.02] transition-transform duration-300"
         >
           <Eye className="h-4 w-4" />
           View Team
