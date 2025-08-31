@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#ffffff">
+    <title>TeamCollab - Revolutionize Team Collaboration</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <div class="logo-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <span class="logo-text">TeamCollab</span>
+            </div>
+            
+            <div class="nav-menu" id="nav-menu">
+                <a href="#home" class="nav-link">Home</a>
+                <a href="#features" class="nav-link">Features</a>
+                <a href="#how-it-works" class="nav-link">How It Works</a>
+                <a href="#testimonials" class="nav-link">Testimonials</a>
+            </div>
+            
+            <div class="nav-actions">
+                <button class="theme-toggle" id="theme-toggle" title="Toggle dark mode">
+                    <div class="toggle-track">
+                        <div class="toggle-thumb">
+                            <i class="fas fa-sun sun-icon"></i>
+                            <i class="fas fa-moon moon-icon"></i>
+                        </div>
+                    </div>
+                </button>
+                <button class="btn-primary animated-btn" onclick="redirectToApp()">
+                    <span>Let's Start</span>
+                    <i class="fas fa-rocket"></i>
+                </button>
+                <div class="mobile-menu-toggle" id="mobile-toggle">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <div class="hero-background">
+            <div class="floating-shapes">
+                <div class="shape shape-1"></div>
+                <div class="shape shape-2"></div>
+                <div class="shape shape-3"></div>
+                <div class="shape shape-4"></div>
+            </div>
+        </div>
+        
+        <div class="hero-container">
+            <div class="hero-content">
+                <h1 class="hero-title">
+                    <span class="gradient-text">Why Use TeamCollab?</span>
+                </h1>
+                <p class="hero-subtitle">
+                    Transform your team collaboration with real-time chat, mentor monitoring, 
+                    and powerful productivity tools. Experience the future of teamwork today.
+                </p>
+                
+                <div class="hero-buttons">
+                    <button class="btn-primary hero-btn" onclick="redirectToApp()">
+                        <span>Let's Get Started</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                    <button class="btn-secondary hero-btn" onclick="openGitHub()">
+                        <i class="fab fa-github"></i>
+                        <span>View on GitHub</span>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="hero-video">
+                <div class="video-container">
+                    <div class="video-placeholder">
+                        <div class="play-button">
+                            <i class="fas fa-play"></i>
+                        </div>
+                        <div class="video-overlay">
+                            <h3>TeamCollab Demo</h3>
+                            <p>See our platform in action</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="scroll-indicator">
+            <div class="scroll-arrow">
+                <i class="fas fa-chevron-down"></i>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features" id="features">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Powerful Features</h2>
+                <p class="section-subtitle">
+                    Discover the tools that make TeamCollab the ultimate collaboration platform
+                </p>
+            </div>
+            
+            <div class="features-grid">
+                <div class="feature-card" data-aos="fade-up" data-aos-delay="100">
+                    <div class="feature-icon">
+                        <i class="fas fa-comments"></i>
+                    </div>
+                    <h3>Real-time Chat</h3>
+                    <p>Instant messaging with typing indicators, read receipts, and message editing capabilities.</p>
+                </div>
+                
+                <div class="feature-card" data-aos="fade-up" data-aos-delay="200">
+                    <div class="feature-icon">
+                        <i class="fas fa-eye"></i>
+                    </div>
+                    <h3>Mentor Monitoring</h3>
+                    <p>Advanced monitoring system with live alerts and comprehensive team oversight tools.</p>
+                </div>
+                
+                <div class="feature-card" data-aos="fade-up" data-aos-delay="300">
+                    <div class="feature-icon">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                    <h3>Smart Notifications</h3>
+                    <p>Intelligent notification system with counters and priority-based alerts.</p>
+                </div>
+                
+                <div class="feature-card" data-aos="fade-up" data-aos-delay="400">
+                    <div class="feature-icon">
+                        <i class="fas fa-circle"></i>
+                    </div>
+                    <h3>Online Status</h3>
+                    <p>Real-time online/offline status tracking for all team members and mentors.</p>
+                </div>
+                
+                <div class="feature-card" data-aos="fade-up" data-aos-delay="500">
+                    <div class="feature-icon">
+                        <i class="fas fa-moon"></i>
+                    </div>
+                    <h3>Dark/Light Mode</h3>
+                    <p>Beautiful theme switching with smooth transitions and user preference memory.</p>
+                </div>
+                
+                <div class="feature-card" data-aos="fade-up" data-aos-delay="600">
+                    <div class="feature-icon">
+                        <i class="fas fa-tasks"></i>
+                    </div>
+                    <h3>Task Management</h3>
+                    <p>Comprehensive task tracking with progress monitoring and team collaboration.</p>
+                </div>
+            </div>
+            
+            <!-- Demo Video Frame -->
+            <div class="demo-video-section" data-aos="fade-up" data-aos-delay="700">
+                <div class="demo-video-frame">
+                    <div class="video-header">
+                        <div class="video-controls">
+                            <div class="control red"></div>
+                            <div class="control yellow"></div>
+                            <div class="control green"></div>
+                        </div>
+                        <span class="video-title">TeamCollab Demo</span>
+                    </div>
+                    <div class="demo-video-content">
+                        <div class="demo-placeholder">
+                            <div class="demo-play-btn">
+                                <i class="fas fa-play"></i>
+                            </div>
+                            <h4>Interactive Demo</h4>
+                            <p>Experience TeamCollab in action</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="how-it-works" id="how-it-works">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">How It Works</h2>
+                <p class="section-subtitle">
+                    Simple workflow that transforms team collaboration
+                </p>
+            </div>
+            
+            <div class="workflow-steps">
+                <div class="step-card" data-aos="fade-right" data-aos-delay="100">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h3>Mentor Sends Notification</h3>
+                        <p>Mentors can instantly send alerts and notifications to teams with priority levels and custom messages.</p>
+                        <div class="step-icon">
+                            <i class="fas fa-paper-plane"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="workflow-arrow" data-aos="fade-up" data-aos-delay="200">
+                    <i class="fas fa-arrow-down"></i>
+                </div>
+                
+                <div class="step-card" data-aos="fade-left" data-aos-delay="300">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h3>Team Receives Red Alert</h3>
+                        <p>Team members get instant red alert notifications with sound and visual indicators for urgent messages.</p>
+                        <div class="step-icon">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="workflow-arrow" data-aos="fade-up" data-aos-delay="400">
+                    <i class="fas fa-arrow-down"></i>
+                </div>
+                
+                <div class="step-card" data-aos="fade-right" data-aos-delay="500">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h3>Real-time Chat Interaction</h3>
+                        <p>Teams collaborate through advanced chat with typing indicators, read receipts, and message editing.</p>
+                        <div class="step-icon">
+                            <i class="fas fa-comments"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="workflow-arrow" data-aos="fade-up" data-aos-delay="600">
+                    <i class="fas fa-arrow-down"></i>
+                </div>
+                
+                <div class="step-card" data-aos="fade-left" data-aos-delay="700">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h3>Live Progress Monitoring</h3>
+                        <p>Mentors monitor team activity in real-time with comprehensive dashboards and progress tracking.</p>
+                        <div class="step-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="testimonials" id="testimonials">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">What Our Users Say</h2>
+                <p class="section-subtitle">
+                    Hear from teams who transformed their collaboration with TeamCollab
+                </p>
+            </div>
+            
+            <div class="testimonials-grid">
+                <div class="testimonial-card" data-aos="fade-up" data-aos-delay="100">
+                    <div class="testimonial-content">
+                        <div class="stars">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <p>"TeamCollab revolutionized how our team communicates. The real-time features and mentor monitoring have increased our productivity by 300%!"</p>
+                    </div>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">
+                            <img src="https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face" alt="Sarah Johnson">
+                        </div>
+                        <div class="author-info">
+                            <h4>Sarah Johnson</h4>
+                            <p>Project Manager</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="testimonial-card" data-aos="fade-up" data-aos-delay="200">
+                    <div class="testimonial-content">
+                        <div class="stars">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <p>"The dark mode and smooth animations make working late hours a pleasure. Best collaboration tool we've ever used!"</p>
+                    </div>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">
+                            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face" alt="Michael Chen">
+                        </div>
+                        <div class="author-info">
+                            <h4>Michael Chen</h4>
+                            <p>Lead Developer</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="testimonial-card" data-aos="fade-up" data-aos-delay="300">
+                    <div class="testimonial-content">
+                        <div class="stars">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <p>"As a mentor, the monitoring dashboard gives me perfect oversight of all teams. The notification system is incredibly intuitive!"</p>
+                    </div>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">
+                            <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face" alt="Emily Rodriguez">
+                        </div>
+                        <div class="author-info">
+                            <h4>Emily Rodriguez</h4>
+                            <p>Senior Mentor</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta">
+        <div class="container">
+            <div class="cta-content" data-aos="fade-up">
+                <h2 class="cta-title">
+                    <span class="gradient-text">Boost your productivity with TeamCollab</span>
+                </h2>
+                <p class="cta-subtitle">Ready to Use!</p>
+                <button class="btn-primary cta-btn" onclick="redirectToApp()">
+                    <span>Get Started Now</span>
+                    <i class="fas fa-rocket"></i>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <div class="footer-logo">
+                        <div class="logo-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <span class="logo-text">TeamCollab</span>
+                    </div>
+                    <p>Revolutionizing team collaboration with modern tools and real-time features.</p>
+                </div>
+                
+                <div class="footer-links">
+                    <div class="footer-section">
+                        <h4>Quick Links</h4>
+                        <a href="#home">Home</a>
+                        <a href="#features">Features</a>
+                        <a href="#how-it-works">How It Works</a>
+                        <a href="#testimonials">Testimonials</a>
+                    </div>
+                    
+                    <div class="footer-section">
+                        <h4>Connect</h4>
+                        <a href="#" onclick="openGitHub()">
+                            <i class="fab fa-github"></i>
+                            GitHub
+                        </a>
+                        <a href="#">
+                            <i class="fab fa-linkedin"></i>
+                            LinkedIn
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2024 TeamCollab. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
