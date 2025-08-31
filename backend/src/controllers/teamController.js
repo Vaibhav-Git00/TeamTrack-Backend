@@ -305,6 +305,114 @@ const leaveTeam = async (req, res) => {
   }
 };
 
+// @desc    Update team
+// @route   PUT /api/teams/:id
+// @access  Private (Team Leaders and Members)
+const updateTeam = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user._id;
+    const { name, size, description, subject } = req.body;
+
+    const team = await Team.findById(id);
+    if (!team) {
+      return res.status(404).json({ message: 'Team not found' });
+    }
+
+    // Check if user is team leader or member
+    if (!team.isLeader(userId) && !team.isMember(userId)) {
+      return res.status(403).json({ message: 'Access denied. You must be a team leader or member to update this team.' });
+    }
+
+    // Validation
+    if (name && name.trim().length === 0) {
+      return res.status(400).json({ message: 'Team name cannot be empty' });
+    }
+
+    if (size && (size < 2 || size > 10)) {
+      return res.status(400).json({ message: 'Team size must be between 2 and 10' });
+    }
+
+    // If reducing team size, check if current members exceed new size
+    if (size && size < team.members.length) {
+      return res.status(400).json({
+        message: `Cannot reduce team size to ${size}. Current team has ${team.members.length} members.`
+      });
+    }
+
+    // Update team fields
+    const updateFields = {};
+    if (name) updateFields.name = name.trim();
+    if (size) updateFields.size = size;
+    if (description !== undefined) updateFields.description = description.trim();
+    if (subject) updateFields.subject = subject.trim();
+
+    const updatedTeam = await Team.findByIdAndUpdate(
+      id,
+      updateFields,
+      { new: true, runValidators: true }
+    )
+      .populate('leader', 'name email')
+      .populate('members.user', 'name email')
+      .populate('mentors', 'name email');
+
+    res.json({
+      success: true,
+      message: 'Team updated successfully',
+      team: updatedTeam
+    });
+  } catch (error) {
+    console.error('Update team error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// @desc    Delete team
+// @route   DELETE /api/teams/:id
+// @access  Private (Team Leaders only)
+const deleteTeam = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user._id;
+
+    const team = await Team.findById(id);
+    if (!team) {
+      return res.status(404).json({ message: 'Team not found' });
+    }
+
+    // Check if user is team leader
+    if (!team.isLeader(userId)) {
+      return res.status(403).json({ message: 'Access denied. Only team leaders can delete the team.' });
+    }
+
+    // Remove team from all members' teams array
+    const memberIds = team.members.map(member => member.user);
+    await User.updateMany(
+      { _id: { $in: memberIds } },
+      { $pull: { teams: team._id } }
+    );
+
+    // Remove team from all mentors' monitoring teams array
+    if (team.mentors.length > 0) {
+      await User.updateMany(
+        { _id: { $in: team.mentors } },
+        { $pull: { monitoringTeams: team._id } }
+      );
+    }
+
+    // Delete the team
+    await Team.findByIdAndDelete(id);
+
+    res.json({
+      success: true,
+      message: 'Team deleted successfully'
+    });
+  } catch (error) {
+    console.error('Delete team error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
 // @desc    Get teams by group (for mentors)
 // @route   GET /api/teams/group/:groupName
 // @access  Private (Mentors only)
@@ -384,6 +492,8 @@ module.exports = {
   getAllTeams,
   addMentorToTeam,
   leaveTeam,
+  updateTeam,
+  deleteTeam,
   getTeamsByGroup,
   getGroupsWithCounts
 };

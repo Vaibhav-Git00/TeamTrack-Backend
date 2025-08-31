@@ -1,15 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useSocket } from '../context/SocketContext';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Users, Upload, Search, BookOpen, Eye } from 'lucide-react';
+import { Plus, Users, Upload, Search, BookOpen, Eye, Edit, Trash2, Settings, FileText, ExternalLink, File } from 'lucide-react';
 import api from '../utils/axios';
+import EditTeamModal from '../components/EditTeamModal';
+import DeleteTeamModal from '../components/DeleteTeamModal';
+import DashboardResourceCard from '../components/DashboardResourceCard';
+import ResourceModal from '../components/ResourceModal';
+import NotificationDebug from '../components/NotificationDebug';
 
 const StudentDashboard = () => {
   const { user } = useAuth();
+  const { joinTeam } = useSocket();
   const [teams, setTeams] = useState([]);
+  const [resources, setResources] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('teams');
   const [showCreateTeam, setShowCreateTeam] = useState(false);
   const [showJoinTeam, setShowJoinTeam] = useState(false);
+  const [showEditTeam, setShowEditTeam] = useState(false);
+  const [showDeleteTeam, setShowDeleteTeam] = useState(false);
+  const [selectedTeam, setSelectedTeam] = useState(null);
+  const [selectedResource, setSelectedResource] = useState(null);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
@@ -33,10 +46,41 @@ const StudentDashboard = () => {
     try {
       const response = await api.get('/teams/my-teams');
       setTeams(response.data.teams);
+
+      // Join teams for real-time notifications
+      response.data.teams.forEach(team => {
+        joinTeam(team._id);
+      });
+
+      // Fetch resources for all teams
+      if (response.data.teams.length > 0) {
+        await fetchAllResources(response.data.teams);
+      }
     } catch (error) {
       setError('Failed to fetch teams');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchAllResources = async (userTeams) => {
+    try {
+      const resourcePromises = userTeams.map(team =>
+        api.get(`/resources/team/${team._id}`)
+      );
+
+      const resourceResponses = await Promise.all(resourcePromises);
+      const allResources = resourceResponses.flatMap((response, index) =>
+        response.data.resources.map(resource => ({
+          ...resource,
+          teamName: userTeams[index].name,
+          teamId: userTeams[index]._id
+        }))
+      );
+
+      setResources(allResources);
+    } catch (error) {
+      console.error('Failed to fetch resources:', error);
     }
   };
 
@@ -66,6 +110,82 @@ const StudentDashboard = () => {
     } catch (error) {
       setError(error.response?.data?.message || 'Failed to join team');
     }
+  };
+
+  const handleEditTeam = (team) => {
+    setSelectedTeam(team);
+    setShowEditTeam(true);
+  };
+
+  const handleDeleteTeam = (team) => {
+    setSelectedTeam(team);
+    setShowDeleteTeam(true);
+  };
+
+  const handleUpdateTeam = async (teamId, updateData) => {
+    try {
+      const response = await api.put(`/teams/${teamId}`, updateData);
+      setTeams(teams.map(team =>
+        team._id === teamId ? response.data.team : team
+      ));
+      setSuccess('Team updated successfully!');
+      setTimeout(() => setSuccess(''), 3000);
+    } catch (error) {
+      throw error; // Re-throw to be handled by the modal
+    }
+  };
+
+  const handleDeleteOrLeaveTeam = async (teamId, isLeave = false) => {
+    try {
+      if (isLeave) {
+        await api.delete(`/teams/${teamId}/leave`);
+        setSuccess('Successfully left the team!');
+      } else {
+        await api.delete(`/teams/${teamId}`);
+        setSuccess('Team deleted successfully!');
+      }
+
+      setTeams(teams.filter(team => team._id !== teamId));
+      setTimeout(() => setSuccess(''), 3000);
+    } catch (error) {
+      throw error; // Re-throw to be handled by the modal
+    }
+  };
+
+  const handleResourceClick = (resource) => {
+    if (resource.type === 'link') {
+      window.open(resource.content, '_blank');
+    } else if (resource.type === 'note') {
+      setSelectedResource(resource);
+    } else {
+      // For files, show in modal for preview
+      setSelectedResource(resource);
+    }
+  };
+
+  const getResourceIcon = (type) => {
+    switch (type) {
+      case 'pdf':
+      case 'doc':
+      case 'docx':
+        return <FileText className="h-5 w-5" />;
+      case 'link':
+        return <ExternalLink className="h-5 w-5" />;
+      case 'note':
+        return <FileText className="h-5 w-5" />;
+      case 'image':
+        return <File className="h-5 w-5" />;
+      default:
+        return <File className="h-5 w-5" />;
+    }
+  };
+
+  const formatFileSize = (bytes) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
   if (loading) {
@@ -107,40 +227,105 @@ const StudentDashboard = () => {
           </div>
         )}
 
-        {/* Action Buttons */}
-        <div className="mb-8 flex flex-wrap gap-4">
-          <button
-            onClick={() => setShowCreateTeam(true)}
-            className="btn btn-primary flex items-center gap-2"
-          >
-            <Plus className="h-4 w-4" />
-            Create Team
-          </button>
-          <button
-            onClick={() => setShowJoinTeam(true)}
-            className="btn btn-outline flex items-center gap-2"
-          >
-            <Search className="h-4 w-4" />
-            Join Team
-          </button>
+        {/* Tab Navigation */}
+        <div className="mb-8">
+          <nav className="flex space-x-8">
+            <button
+              onClick={() => setActiveTab('teams')}
+              className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'teams'
+                  ? 'border-primary-500 text-primary-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              My Teams ({teams.length})
+            </button>
+            <button
+              onClick={() => setActiveTab('resources')}
+              className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'resources'
+                  ? 'border-primary-500 text-primary-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              All Resources ({resources.length})
+            </button>
+          </nav>
         </div>
 
-        {/* Teams Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {teams.map((team) => (
-            <TeamCard key={team._id} team={team} />
-          ))}
-          
-          {teams.length === 0 && (
-            <div className="col-span-full text-center py-12">
-              <Users className="mx-auto h-12 w-12 text-gray-400" />
-              <h3 className="mt-2 text-sm font-medium text-gray-900">No teams yet</h3>
-              <p className="mt-1 text-sm text-gray-500">
-                Get started by creating a team or joining an existing one.
-              </p>
-            </div>
-          )}
-        </div>
+        {/* Action Buttons */}
+        {activeTab === 'teams' && (
+          <div className="mb-8 flex flex-wrap gap-4">
+            <button
+              onClick={() => setShowCreateTeam(true)}
+              className="btn btn-primary flex items-center gap-2"
+            >
+              <Plus className="h-4 w-4" />
+              Create Team
+            </button>
+            <button
+              onClick={() => setShowJoinTeam(true)}
+              className="btn btn-outline flex items-center gap-2"
+            >
+              <Search className="h-4 w-4" />
+              Join Team
+            </button>
+          </div>
+        )}
+
+        {/* Content based on active tab */}
+        {activeTab === 'teams' && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {teams.map((team) => (
+              <TeamCard
+                key={team._id}
+                team={team}
+                currentUserId={user?.id}
+                onEdit={handleEditTeam}
+                onDelete={handleDeleteTeam}
+              />
+            ))}
+
+            {teams.length === 0 && (
+              <div className="col-span-full text-center py-12">
+                <Users className="mx-auto h-12 w-12 text-gray-400" />
+                <h3 className="mt-2 text-sm font-medium text-gray-900">No teams yet</h3>
+                <p className="mt-1 text-sm text-gray-500">
+                  Get started by creating a team or joining an existing one.
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Resources Tab */}
+        {activeTab === 'resources' && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {resources.map((resource) => (
+              <div key={resource._id} className="relative">
+                <DashboardResourceCard
+                  resource={resource}
+                  onResourceClick={handleResourceClick}
+                  getResourceIcon={getResourceIcon}
+                  formatFileSize={formatFileSize}
+                />
+                <div className="absolute top-2 right-2 bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+                  {resource.teamName}
+                </div>
+              </div>
+            ))}
+
+            {resources.length === 0 && (
+              <div className="col-span-full text-center py-12">
+                <BookOpen className="mx-auto h-12 w-12 text-gray-400" />
+                <h3 className="mt-2 text-sm font-medium text-gray-900">No resources yet</h3>
+                <p className="mt-1 text-sm text-gray-500">
+                  Resources from your teams will appear here once uploaded.
+                </p>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Create Team Modal */}
         {showCreateTeam && (
@@ -257,31 +442,90 @@ const StudentDashboard = () => {
             </div>
           </div>
         )}
+
+        {/* Edit Team Modal */}
+        {showEditTeam && selectedTeam && (
+          <EditTeamModal
+            team={selectedTeam}
+            onClose={() => {
+              setShowEditTeam(false);
+              setSelectedTeam(null);
+            }}
+            onUpdate={handleUpdateTeam}
+          />
+        )}
+
+        {/* Delete/Leave Team Modal */}
+        {showDeleteTeam && selectedTeam && (
+          <DeleteTeamModal
+            team={selectedTeam}
+            isLeader={selectedTeam.leader?._id === user?.id}
+            onClose={() => {
+              setShowDeleteTeam(false);
+              setSelectedTeam(null);
+            }}
+            onDelete={handleDeleteOrLeaveTeam}
+          />
+        )}
+
+        {/* Resource Modal */}
+        {selectedResource && (
+          <ResourceModal
+            resource={selectedResource}
+            onClose={() => setSelectedResource(null)}
+          />
+        )}
+
+        {/* Debug Component */}
+        <NotificationDebug />
       </div>
     </div>
   );
 };
 
 // Team Card Component
-const TeamCard = ({ team }) => {
+const TeamCard = ({ team, currentUserId, onEdit, onDelete }) => {
   const navigate = useNavigate();
 
   const handleViewTeam = () => {
     navigate(`/team/${team._id}`);
   };
 
+  const isLeader = team.leader?._id === currentUserId;
+  const isMember = team.members?.some(member => member.user._id === currentUserId);
+
   return (
     <div className="card">
       <div className="card-header">
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-medium text-gray-900">{team.name}</h3>
-          <div className="flex gap-2">
-            <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
-              {team.group}
-            </span>
-            <span className="text-xs bg-primary-100 text-primary-800 px-2 py-1 rounded-full">
-              {team.teamId}
-            </span>
+          <div className="flex items-center gap-2">
+            <div className="flex gap-2">
+              <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
+                {team.group}
+              </span>
+              <span className="text-xs bg-primary-100 text-primary-800 px-2 py-1 rounded-full">
+                {team.teamId}
+              </span>
+            </div>
+            {(isLeader || isMember) && (
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => onEdit(team)}
+                  className="p-1 text-gray-400 hover:text-blue-600 transition-colors"
+                  title="Edit team"
+                >
+                  <Edit className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={() => onDelete(team)}
+                  className="p-1 text-gray-400 hover:text-red-600 transition-colors"
+                  title={isLeader ? "Delete team" : "Leave team"}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
+            )}
           </div>
         </div>
         {team.subject && (
@@ -305,6 +549,7 @@ const TeamCard = ({ team }) => {
         <div className="mt-3">
           <p className="text-sm text-gray-600">
             Leader: {team.leader?.name}
+            {isLeader && <span className="text-primary-600 font-medium"> (You)</span>}
           </p>
         </div>
       </div>

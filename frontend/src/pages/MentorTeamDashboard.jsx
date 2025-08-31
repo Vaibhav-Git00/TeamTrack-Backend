@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { 
-  ArrowLeft, 
-  Users, 
-  BookOpen, 
+import {
+  ArrowLeft,
+  Users,
+  BookOpen,
   Target,
   CheckCircle,
   Clock,
@@ -14,13 +14,15 @@ import {
   FileText,
   Image,
   File,
-  Eye
+  Eye,
+  MessageSquare
 } from 'lucide-react';
 import api from '../utils/axios';
 import TaskStatusBadge from '../components/TaskStatusBadge';
 import MentorTaskCard from '../components/MentorTaskCard';
-import ResourceCard from '../components/ResourceCard';
+import DashboardResourceCard from '../components/DashboardResourceCard';
 import ResourceModal from '../components/ResourceModal';
+import CreateSuggestionModal from '../components/CreateSuggestionModal';
 
 const MentorTeamDashboard = () => {
   const { teamId } = useParams();
@@ -33,8 +35,10 @@ const MentorTeamDashboard = () => {
   const [progress, setProgress] = useState({ totalTasks: 0, completedTasks: 0, progressPercentage: 0 });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [activeTab, setActiveTab] = useState('overview');
   const [selectedResource, setSelectedResource] = useState(null);
+  const [showSuggestionModal, setShowSuggestionModal] = useState(false);
 
   useEffect(() => {
     fetchTeamData();
@@ -110,6 +114,16 @@ const MentorTeamDashboard = () => {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
+  const handleCreateSuggestion = async (suggestionData) => {
+    try {
+      await api.post('/suggestions', suggestionData);
+      setSuccess('Suggestion sent successfully!');
+      setTimeout(() => setSuccess(''), 3000);
+    } catch (error) {
+      throw error; // Re-throw to be handled by the modal
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -165,8 +179,25 @@ const MentorTeamDashboard = () => {
                 <p className="text-gray-600 mt-2">{team.description}</p>
               )}
             </div>
+
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setShowSuggestionModal(true)}
+                className="btn btn-primary flex items-center gap-2"
+              >
+                <MessageSquare className="h-4 w-4" />
+                Send Suggestion
+              </button>
+            </div>
           </div>
         </div>
+
+        {/* Success Message */}
+        {success && (
+          <div className="mb-6 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded">
+            {success}
+          </div>
+        )}
 
         {/* Error Message */}
         {error && (
@@ -268,9 +299,18 @@ const MentorTeamDashboard = () => {
 
         {/* Resource Modal */}
         {selectedResource && (
-          <ResourceModal 
-            resource={selectedResource} 
-            onClose={() => setSelectedResource(null)} 
+          <ResourceModal
+            resource={selectedResource}
+            onClose={() => setSelectedResource(null)}
+          />
+        )}
+
+        {/* Create Suggestion Modal */}
+        {showSuggestionModal && (
+          <CreateSuggestionModal
+            team={team}
+            onClose={() => setShowSuggestionModal(false)}
+            onSubmit={handleCreateSuggestion}
           />
         )}
       </div>
@@ -389,7 +429,7 @@ const ResourcesTab = ({ resources, onResourceClick, getResourceIcon, formatFileS
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {resources.map((resource) => (
-        <ResourceCard
+        <DashboardResourceCard
           key={resource._id}
           resource={resource}
           onResourceClick={onResourceClick}

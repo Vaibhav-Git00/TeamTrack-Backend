@@ -25,8 +25,9 @@ import TaskCard from '../components/TaskCard';
 import CreateTaskModal from '../components/CreateTaskModal';
 import TaskStatusBadge from '../components/TaskStatusBadge';
 import ResourceUpload from '../components/ResourceUpload';
-import ResourceCard from '../components/ResourceCard';
+import DashboardResourceCard from '../components/DashboardResourceCard';
 import ResourceModal from '../components/ResourceModal';
+import TeamChat from '../components/TeamChat';
 
 const TeamDashboard = () => {
   const { teamId } = useParams();
@@ -313,6 +314,16 @@ const TeamDashboard = () => {
             >
               Resources ({resources.length})
             </button>
+            <button
+              onClick={() => setActiveTab('chat')}
+              className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'chat'
+                  ? 'border-primary-500 text-primary-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              Team Chat
+            </button>
           </nav>
         </div>
 
@@ -341,6 +352,12 @@ const TeamDashboard = () => {
             resources={resources}
             onResourceClick={handleResourceClick}
           />
+        )}
+
+        {activeTab === 'chat' && (
+          <div className="h-96">
+            <TeamChat teamId={teamId} teamName={team?.name} />
+          </div>
         )}
 
         {/* Create Task Modal */}
@@ -521,7 +538,7 @@ const ResourcesTab = ({ resources, onResourceClick }) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {resources.map((resource) => (
-        <ResourceCard
+        <DashboardResourceCard
           key={resource._id}
           resource={resource}
           onResourceClick={onResourceClick}

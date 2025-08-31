@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { 
-  Users, 
-  LogOut, 
-  Menu, 
-  X, 
-  User, 
+import NotificationSystem from './NotificationSystem';
+import {
+  Users,
+  LogOut,
+  Menu,
+  X,
+  User,
   BookOpen,
   Home
 } from 'lucide-react';
@@ -83,6 +84,9 @@ const Navbar = () => {
 
           {/* User Menu */}
           <div className="hidden md:flex items-center space-x-4">
+            {/* Notification System */}
+            <NotificationSystem />
+
             <div className="flex items-center space-x-3">
               <div className="flex items-center space-x-2">
                 <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center">
