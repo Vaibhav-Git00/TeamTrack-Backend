@@ -2,8 +2,10 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { SocketProvider } from './context/SocketContext';
+import { ThemeProvider } from './context/ThemeContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import Navbar from './components/Navbar';
+import NotificationSystem from './components/NotificationSystem';
 
 // Pages
 import Login from './pages/Login';
@@ -27,14 +29,15 @@ const DashboardRouter = () => {
 // Layout Component
 const Layout = ({ children }) => {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-dark-900 transition-colors duration-300">
       <Navbar />
-      <main>{children}</main>
+      <main className="transition-colors duration-300">{children}</main>
+      <NotificationSystem />
     </div>
   );
 };
 
-function App() {
+const AppContent = () => {
   return (
     <AuthProvider>
       <SocketProvider>
@@ -157,6 +160,14 @@ function App() {
         </Router>
       </SocketProvider>
     </AuthProvider>
+  );
+}
+
+function App() {
+  return (
+    <ThemeProvider>
+      <AppContent />
+    </ThemeProvider>
   );
 }
 

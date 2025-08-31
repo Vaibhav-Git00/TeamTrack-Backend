@@ -168,34 +168,34 @@ const TeamDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-dark-900 transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-8 animate-slide-in-down">
           <button
             onClick={() => navigate('/dashboard')}
-            className="flex items-center text-gray-600 hover:text-gray-900 mb-4"
+            className="flex items-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 mb-4 transition-colors duration-300"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Dashboard
           </button>
-          
+
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">{team.name}</h1>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 transition-colors duration-300">{team.name} 🚀</h1>
               <div className="flex items-center gap-4 mt-2">
-                <span className="text-sm bg-green-100 text-green-800 px-3 py-1 rounded-full">
+                <span className="text-sm bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 px-3 py-1 rounded-full font-medium">
                   {team.group}
                 </span>
-                <span className="text-sm bg-blue-100 text-blue-800 px-3 py-1 rounded-full">
+                <span className="text-sm bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 px-3 py-1 rounded-full font-medium">
                   📚 {team.subject}
                 </span>
-                <span className="text-sm bg-gray-100 text-gray-800 px-3 py-1 rounded-full">
+                <span className="text-sm bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-300 px-3 py-1 rounded-full font-medium">
                   ID: {team.teamId}
                 </span>
               </div>
               {team.description && (
-                <p className="text-gray-600 mt-2">{team.description}</p>
+                <p className="text-gray-600 dark:text-gray-400 mt-2 transition-colors duration-300">{team.description}</p>
               )}
             </div>
             
@@ -224,16 +224,16 @@ const TeamDashboard = () => {
 
         {/* Success/Error Messages */}
         {success && (
-          <div className="mb-6 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded">
+          <div className="mb-6 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-300 px-4 py-3 rounded-xl animate-slide-in-down transition-colors duration-300">
             {success}
           </div>
         )}
         {error && (
-          <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+          <div className="mb-6 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded-xl animate-slide-in-down transition-colors duration-300">
             {error}
-            <button 
+            <button
               onClick={() => setError('')}
-              className="ml-2 text-red-500 hover:text-red-700"
+              className="ml-2 text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 transition-colors duration-300"
             >
               ×
             </button>

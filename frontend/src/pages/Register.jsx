@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Eye, EyeOff, UserPlus, AlertCircle } from 'lucide-react';
+import ThemeToggle from '../components/ThemeToggle';
+import { Eye, EyeOff, UserPlus, AlertCircle, User, Mail, Lock, ArrowLeft, Sparkles, Shield, Zap } from 'lucide-react';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -96,24 +97,41 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <div className="mx-auto h-12 w-12 flex items-center justify-center rounded-full bg-primary-600">
-            <UserPlus className="h-6 w-6 text-white" />
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50 dark:from-dark-900 dark:via-dark-800 dark:to-dark-900 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden transition-colors duration-500">
+      {/* Animated Background Elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-purple-400/20 to-pink-400/20 rounded-full blur-3xl animate-float"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-blue-400/20 to-indigo-400/20 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }}></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-br from-indigo-400/10 to-purple-400/10 rounded-full blur-3xl animate-pulse-slow"></div>
+      </div>
+
+      {/* Theme Toggle */}
+      <div className="absolute top-6 right-6 z-10">
+        <ThemeToggle />
+      </div>
+
+      <div className="max-w-md w-full space-y-8 relative z-10">
+        {/* Header */}
+        <div className="text-center animate-slide-in-down">
+          <div className="mx-auto h-16 w-16 flex items-center justify-center rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-700 shadow-lg shadow-purple-500/25 mb-8 animate-bounce-in">
+            <UserPlus className="h-8 w-8 text-white" />
           </div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Create your account
+          <h2 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-2 transition-colors duration-300">
+            Join TeamTrack
           </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Or{' '}
+          <p className="text-gray-600 dark:text-gray-400 mb-2 transition-colors duration-300">
+            Create your account and start collaborating
+          </p>
+          <div className="flex items-center justify-center space-x-2 text-sm text-gray-500 dark:text-gray-500">
+            <span>Already have an account?</span>
             <Link
               to="/login"
-              className="font-medium text-primary-600 hover:text-primary-500"
+              className="font-semibold text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors duration-300 group"
             >
-              sign in to existing account
+              <ArrowLeft className="inline-block w-4 h-4 mr-1 group-hover:-translate-x-1 transition-transform duration-300" />
+              Sign in
             </Link>
-          </p>
+          </div>
         </div>
 
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
