@@ -334,7 +334,16 @@ const uploadFileResource = async (req, res) => {
 
     // Get file information
     const fileType = getFileType(req.file.mimetype);
-    const fileUrl = `/uploads/${req.file.filename}`;
+    
+    // Handle file URL - Cloudinary vs local storage
+    let fileUrl;
+    if (process.env.NODE_ENV === 'production' && process.env.CLOUDINARY_CLOUD_NAME) {
+      // Cloudinary provides the full URL
+      fileUrl = req.file.path;
+    } else {
+      // Local storage uses relative path
+      fileUrl = `/uploads/${req.file.filename}`;
+    }
 
     // Create resource
     const resource = await Resource.create({
