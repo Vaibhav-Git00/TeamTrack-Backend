@@ -23,7 +23,17 @@ const server = http.createServer(app);
 // Socket.io setup with improved configuration
 const io = socketIo(server, {
   cors: {
-    origin: ["http://localhost:3000", "http://localhost:3001", "http://127.0.0.1:3000", "http://127.0.0.1:3001"],
+    origin: process.env.NODE_ENV === 'production' 
+      ? ["https://team-track-frontend.vercel.app"]
+      : [
+          "http://localhost:3000", 
+          "http://localhost:3001", 
+          "http://localhost:4173", 
+          "http://127.0.0.1:3000", 
+          "http://127.0.0.1:3001", 
+          "http://127.0.0.1:4173",
+          "https://team-track-frontend.vercel.app"
+        ],
     methods: ["GET", "POST"],
     credentials: true
   },
@@ -33,8 +43,27 @@ const io = socketIo(server, {
 });
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: process.env.NODE_ENV === 'production' 
+    ? ["https://team-track-frontend.vercel.app"]
+    : [
+        "http://localhost:3000", 
+        "http://localhost:3001", 
+        "http://localhost:4173", 
+        "http://127.0.0.1:3000", 
+        "http://127.0.0.1:3001", 
+        "http://127.0.0.1:4173",
+        "https://team-track-frontend.vercel.app"
+      ],
+  credentials: true
+}));
 app.use(express.json());
+
+// Request logging middleware for debugging
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.path} - ${new Date().toISOString()}`);
+  next();
+});
 
 // Serve static files (uploaded files)
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
