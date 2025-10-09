@@ -1,4 +1,4 @@
-# Team Collaboration & Mentorship Platform - Backend
+# Team Collaboration & Mentorship Platform 
 
 ## Overview
 This is the backend API for the Team Collaboration & Mentorship Platform built with Node.js, Express.js, and MongoDB.
